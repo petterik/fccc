@@ -49,3 +49,13 @@
          (map (fn [prime]
                 (map #(* prime %) (cons 1 primes))))
          (cons primes))))
+
+(defn print-table [matrix]
+  (let [header (cons nil (first matrix))]
+    (clojure.pprint/print-table
+      (into []
+            (map (fn [row] (into (sorted-map) (map vector header row))))
+            (rest matrix)))))
+
+(defn -main [& args]
+  (print-table (prime-matrix 10)))
