@@ -1,4 +1,5 @@
-(ns fccc.core)
+(ns fccc.core
+  (:require [clojure.pprint :as pprint]))
 
 (defn divisors
   "Returns a transducer filtering the numbers that divide i."
@@ -52,7 +53,7 @@
 
 (defn print-table [matrix]
   (let [header (cons nil (first matrix))]
-    (clojure.pprint/print-table
+    (pprint/print-table
       (into []
             (map (fn [row] (into (sorted-map) (map vector header row))))
             (rest matrix)))))
