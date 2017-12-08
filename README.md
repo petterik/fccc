@@ -31,7 +31,39 @@ If you want to build it yourself, run `lein uberjar`.
 
 ## Thought process
 
-Given how the challenge was described, I decided to write my own prime generating algorithm without looking at the state of the art. I've written tests (first) for the algorithm and benchmarked it. Tests and benchmarks are found in `test/fcc/core_test.clj`.
+The objective is to print a multiplication table of the first 10 primes. To do this, we need prime numbers and the challenge states that I should write my own code to do this. Let's start with that.
+
+### Prime number generator
+I've decided to write my own prime generating algorithm, without looking at the state of the art, to show that I can come up with one, analyze it and make it run as fast as I can. I start write test cases for the prime generating function and not a "prime number checking" as it's an implementation detail that can limit the possible implementations of the higher level function. Here are some of the test cases I considered:
+* Trying to get 0 or -1 prime numbers => Returns empty seq
+* My function should generate the first known primes, starting with 2,3.
+* There shouldn't be any even numbers after the first one.
+* The 100th prime should be 541 and the 1000th prime 7919.
+
+All the versions of my prime generating function are in the git commit history. I'll include some of them here. I started by implementing a naive prime generator:
+```clj
+(defn n-primes [n]
+  (when (pos? n)
+    (->> (iterate (comp inc inc) 3)
+         (filter (fn [new]
+                   (every? #(ratio? (/ new %)) (range 3 new))))
+         (cons 2)
+         (take n))))
+```
+This function will try to divide against any number, instead of the primes we've already found. To change this I used `reduce` instead of `filter`:
+```clj
+(defn n-primes [n]
+  (when (pos? n)
+    (->> (iterate #(+ 2 %) 3)
+         (reduce (fn [primes new]
+                   (if (== n (count primes))
+                     (reduced primes)
+                     (cond-> primes
+                             (every? #(ratio? (/ new %)) primes)
+                             (conj new))))
+                 [2]))))
+```
+This function will only try to divide against the found primes and will stop when we've found `n` `primes`. An optimized version of this one with comments is what's in the final version.
 
 The analysis of the algorithm is in the doc string, as well as copied here:
 ```clj
@@ -55,6 +87,47 @@ fccc.core/n-primes
     Using Cantor's theories around infinite numbers, we learn
     that P, Q and N are all the same, in what's called ℵ0.
     Thus the code runs in O(N^2).
+```
+
+
+Now that we can generate primes, let's create the multiplication table, then worry about how to print it.
+
+### Multiplication table (matrix)
+
+For the multiplication table, we want to create a matrix with the sums of the first prime to the last prime. This would be a multiplication table of the first 3 primes:
+```clj
+[[   2  3  5]
+ [2  4  6 10]
+ [3  6  9 15]
+ [5 10 15 25]]
+```
+Test cases for this were:
+* First row and first column should be equals to n primes, where n is the size of the matrix's first row.
+* Second row's second value is 2x2=4.
+* All rows but the first one is of size n+1.
+* Last row's last value is the (nth prime)^2
+
+### Printing the table
+
+There's a table printing function in the `clojure.pprint` namespace, which takes which keys to print and a seq of maps. The matrix with 3 primes printed above gets printed like this:
+```
+|   |  2 |  3 |  5 |
+|---+----+----+----|
+| 2 |  4 |  6 | 10 |
+| 3 |  6 |  9 | 15 |
+| 5 | 10 | 15 | 25 |
+```
+
+The implementation of printing this is not tested, but it was clear that it worked when it was executed. Here's the implementation.
+```clj
+(defn print-table
+  "Prints a matrix with a header as a table with clojure.pprint."
+  [matrix]
+  (let [header (cons nil (first matrix))]
+    (pprint/print-table
+      (into []
+            (map (fn [row] (into (sorted-map) (map vector header row))))
+            (rest matrix)))))
 ```
 
 ## License
