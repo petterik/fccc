@@ -1,26 +1,25 @@
 (ns fccc.core)
 
-(defn prime? [primes ^long i]
+(defn divisors
+  "Returns a transducer filtering the numbers that divide i."
+  [^long i]
   (let [largest-factor (long (inc (Math/sqrt i)))]
-    (->> primes
-         (eduction
-           ;; Only takes until the largest possible factor.
-           (take-while (fn [^long prime]
-                         (<= prime largest-factor)))
-           ;; Using type hints and `rem` instead of `/` for perf.
-           (filter (fn [^long prime]
-                     (== 0 (rem i prime)))))
-         ;; Prime if we could not divide the number i.
-         (empty?))))
+    (comp
+      ;; Only takes until the largest possible factor.
+      (take-while (fn [^long num] (<= num largest-factor)))
+      ;; Using type hints and `rem` instead of `/` for perf.
+      (filter (fn [^long num] (== 0 (rem i num)))))))
 
-(defn n-primes [n]
+(defn n-primes
+  "Returns n prime numbers."
+  [n]
   (when (pos? n)
     ;; Using reduce to have the primes we've found so far.
     (reduce (fn [primes i]
               (if (== n (count primes))
                 (reduced primes)
                 (cond-> primes
-                        (prime? primes i)
+                        (empty? (eduction (divisors i) primes))
                         (conj i))))
             ;; Adds the first and only even number.
             [2]
