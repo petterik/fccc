@@ -1,5 +1,6 @@
 (ns fccc.core
-  (:require [clojure.pprint :as pprint]))
+  (:require [clojure.pprint :as pprint])
+  (:gen-class))
 
 (defn divisors
   "Returns a transducer filtering the numbers that divide i."
