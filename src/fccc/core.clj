@@ -1,6 +1,10 @@
 (ns fccc.core)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn n-primes [n]
+  (when (pos? n)
+    (->> (iterate (comp inc inc) 3)
+         (filter (fn [new]
+                   (every? #(ratio? (/ new %)) (range 3 new))))
+         (cons 2)
+         (take n))))
+
