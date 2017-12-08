@@ -12,6 +12,28 @@
     (is (= 541 (last (fccc/n-primes 100))))
     (is (= 7919 (last (fccc/n-primes 1000))))))
 
+(deftest prime-matrix-test
+  (let [primes (fccc/n-primes 10)
+        matrix (fccc/prime-matrix 10)]
+
+    (testing "First row should be equal to the primes"
+      (is (= (first matrix) primes)))
+    (testing "First column should be equal to primes"
+      (is (= (map first matrix) primes)))
+
+    (testing "Second row's last item should be last prime * second prime"
+      (is (= (* (second primes) (last primes))
+             (-> matrix second last))))
+
+    (testing "Second row, second item should be 3x3=9"
+      (is (= 9 (-> matrix second second))))
+
+    (testing "All rows should be the same length"
+      (is (every? #{(count primes)} (map count matrix))))
+
+    (testing "last row and last item should equal last prime * last prime"
+      (is (= (* (last primes) (last primes))
+             (-> matrix last last))))))
 
 
 (comment

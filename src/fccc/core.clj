@@ -42,3 +42,11 @@
             ;; Generates all odd numbers.
             ;; Using range over iterate, as ranges implement IReduceInit.
             (range 3 Long/MAX_VALUE 2))))
+
+(defn prime-matrix [n]
+  (let [primes (n-primes n)]
+    (->> (rest primes)
+         (map (fn [prime]
+                (map #(* prime %) (cons 1 (rest primes)))))
+         (cons primes))))
+
