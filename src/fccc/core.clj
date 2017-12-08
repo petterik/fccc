@@ -2,9 +2,12 @@
 
 (defn n-primes [n]
   (when (pos? n)
-    (->> (iterate (comp inc inc) 3)
-         (filter (fn [new]
-                   (every? #(ratio? (/ new %)) (range 3 new))))
-         (cons 2)
-         (take n))))
+    (->> (iterate #(+ 2 %) 3)
+         (reduce (fn [primes new]
+                   (if (== n (count primes))
+                     (reduced primes)
+                     (cond-> primes
+                             (every? #(ratio? (/ new %)) primes)
+                             (conj new))))
+                 [2]))))
 
