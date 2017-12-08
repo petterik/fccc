@@ -34,10 +34,10 @@ If you want to build it yourself, run `lein uberjar`.
 The objective is to print a multiplication table of the first 10 primes. To do this, we need prime numbers and the challenge states that I should write my own code to do this. Let's start with that.
 
 ### Prime number generator
-I've decided to write my own prime generating algorithm, without looking at the state of the art, to show that I can come up with one, analyze it and make it run as fast as I can. I start write test cases for the prime generating function and not a "prime number checking" as it's an implementation detail that can limit the possible implementations of the higher level function. Here are some of the test cases I considered:
+I've decided to write my own prime generating algorithm - without looking at the state of the art - to show that I can come up with one and analyze it. I start with writing test cases for the prime generating function and not a "prime number checking" function (e.g. `(is-prime? 2)`) as it's an implementation detail that can limit the possible implementations of the higher level function. Here are some of the test cases I considered:
 * Trying to get 0 or -1 prime numbers => Returns empty seq
-* My function should generate the first known primes, starting with 2,3.
-* There shouldn't be any even numbers after the first one.
+* My function should generate the first known primes, starting with 2,3 and 5.
+* There shouldn't be any even numbers after the first prime.
 * The 100th prime should be 541 and the 1000th prime 7919.
 
 All the versions of my prime generating function are in the git commit history. I'll include some of them here. I started by implementing a naive prime generator:
@@ -50,7 +50,7 @@ All the versions of my prime generating function are in the git commit history. 
          (cons 2)
          (take n))))
 ```
-This function will try to divide against any number, instead of the primes we've already found. To change this I used `reduce` instead of `filter`:
+This function will try to divide against any number larger than 3. We can do better by only checking against the primes that we generated so far:
 ```clj
 (defn n-primes [n]
   (when (pos? n)
@@ -89,19 +89,18 @@ fccc.core/n-primes
     Thus the code runs in O(N^2).
 ```
 
-
 Now that we can generate primes, let's create the multiplication table, then worry about how to print it.
 
 ### Multiplication table (matrix)
 
-For the multiplication table, we want to create a matrix with the sums of the first prime to the last prime. This would be a multiplication table of the first 3 primes:
+For the multiplication table, we want to create a matrix with the products of the first prime to the last prime. Here's what a multiplication table of the first 3 primes would look like:
 ```clj
 [[   2  3  5]
  [2  4  6 10]
  [3  6  9 15]
  [5 10 15 25]]
 ```
-Test cases for this were:
+Test cases for this included:
 * First row and first column should be equals to n primes, where n is the size of the matrix's first row.
 * Second row's second value is 2x2=4.
 * All rows but the first one is of size n+1.
@@ -109,7 +108,7 @@ Test cases for this were:
 
 ### Printing the table
 
-There's a table printing function in the `clojure.pprint` namespace, which takes which keys to print and a seq of maps. The matrix with 3 primes printed above gets printed like this:
+There's a table printing function in the `clojure.pprint` namespace, which takes a seq of maps and optionally which keys to print. The matrix with 3 primes printed above gets printed like this:
 ```
 |   |  2 |  3 |  5 |
 |---+----+----+----|
@@ -118,7 +117,7 @@ There's a table printing function in the `clojure.pprint` namespace, which takes
 | 5 | 10 | 15 | 25 |
 ```
 
-The implementation of printing this is not tested, but it was clear that it worked when it was executed. Here's the implementation.
+The implementation of printing this is not tested. Here's how we print our multiplication table:
 ```clj
 (defn print-table
   "Prints a matrix with a header as a table with clojure.pprint."
