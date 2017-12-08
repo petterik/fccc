@@ -18,18 +18,18 @@
 
     (testing "First row should be equal to the primes"
       (is (= (first matrix) primes)))
-    (testing "First column should be equal to primes"
-      (is (= (map first matrix) primes)))
+    (testing "First column (excluding header) should be equal to primes"
+      (is (= (map first (rest matrix)) primes)))
 
-    (testing "Second row's last item should be last prime * second prime"
-      (is (= (* (second primes) (last primes))
+    (testing "Second row's last item should be last prime * first prime"
+      (is (= (* (first primes) (last primes))
              (-> matrix second last))))
 
-    (testing "Second row, second item should be 3x3=9"
-      (is (= 9 (-> matrix second second))))
+    (testing "Second row, second item should be 2x2=4"
+      (is (= 4 (-> matrix second second))))
 
     (testing "All rows should be the same length"
-      (is (every? #{(count primes)} (map count matrix))))
+      (is (every? #{(inc (count primes))} (map count (rest matrix)))))
 
     (testing "last row and last item should equal last prime * last prime"
       (is (= (* (last primes) (last primes))

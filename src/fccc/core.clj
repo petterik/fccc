@@ -45,8 +45,7 @@
 
 (defn prime-matrix [n]
   (let [primes (n-primes n)]
-    (->> (rest primes)
+    (->> primes
          (map (fn [prime]
-                (map #(* prime %) (cons 1 (rest primes)))))
+                (map #(* prime %) (cons 1 primes))))
          (cons primes))))
-
