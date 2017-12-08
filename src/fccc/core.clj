@@ -3,7 +3,8 @@
   (:gen-class))
 
 (defn divisors
-  "Returns a transducer filtering the numbers that divide i."
+  "Returns a transducer filtering numbers in increasing order
+   that divide i."
   [^long i]
   (let [largest-factor (long (inc (Math/sqrt i)))]
     (comp
@@ -37,27 +38,41 @@
                 (reduced primes)
                 (cond-> primes
                         ;; If there are no divisors to i, it's a prime.
+                        ;; Note: Using eduction instead of sequence as
+                        ;;       eduction is twice as fast for this case.
                         (empty? (eduction (divisors i) primes))
                         (conj i))))
             ;; Adds the first and only even number.
             [2]
             ;; Generates all odd numbers.
             ;; Using range over iterate, as ranges implement IReduceInit.
+            ;; Tradeoff: Limit's the algorithm, but makes it execute
+            ;;           faster. I'm willing to limit the algorithm's max
+            ;;           value as the algorithm is too slow to get to the
+            ;;           limit anyway.
             (range 3 Long/MAX_VALUE 2))))
 
-(defn prime-matrix [n]
+(defn prime-matrix
+  "Generates a matrix where the first row and first column
+   are prime numbers, and the rest of the numbers are products
+   of to the corresponding header and column values."
+  [n]
   (let [primes (n-primes n)]
     (->> primes
          (map (fn [prime]
                 (map #(* prime %) (cons 1 primes))))
          (cons primes))))
 
-(defn print-table [matrix]
+(defn print-table
+  "Prints a matrix with a header as a table with clojure.pprint."
+  [matrix]
   (let [header (cons nil (first matrix))]
     (pprint/print-table
       (into []
             (map (fn [row] (into (sorted-map) (map vector header row))))
             (rest matrix)))))
 
-(defn -main [& args]
+(defn -main
+  "Prints out a multiplication table of the first 10 prime number."
+  [& args]
   (print-table (prime-matrix 10)))
